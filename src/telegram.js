@@ -519,17 +519,7 @@ class TelegramBot extends EventEmitter {
     return fileStream;
   }
 
-  /**
-   * Downloads file in the specified folder.
-   *
-   * This method is a sugar extension of the [getFileStream](#TelegramBot+getFileStream) method,
-   * which returns a readable file stream.
-   *
-   * @param  {String} fileId  File identifier to get info about
-   * @param  {String} downloadDir Absolute path to the folder in which file will be saved
-   * @param  {Object} [options] Additional Telegram query options
-   * @return {Promise} Promise, which will have *filePath* of downloaded file in resolve callback
-   */
+
   downloadFile(fileId, downloadDir, form = {}) {
     let resolve;
     let reject;
