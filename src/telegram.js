@@ -7,8 +7,7 @@ const TelegramBotPolling = require('./telegramPolling');
 const debug = require('debug')('node-telegram-bot-api');
 const EventEmitter = require('eventemitter3');
 const fileType = require('file-type');
-const request = require('@cypress/request-promise');
-const streamedRequest = require('@cypress/request');
+const axios = require('axios');
 const qs = require('querystring');
 const stream = require('stream');
 const mime = require('mime');
@@ -280,44 +279,56 @@ class TelegramBot extends EventEmitter {
       return Promise.reject(new errors.FatalError('Telegram Bot Token not provided!'));
     }
 
-    if (this.options.request) {
-      Object.assign(options, this.options.request);
-    }
+    const requestOptions = {
+      method: 'POST',
+      url: this._buildURL(_path),
+      validateStatus: null // 不抛出任何状态的错误
+    };
 
     if (options.form) {
       this._fixReplyMarkup(options.form);
       this._fixEntitiesField(options.form);
       this._fixReplyParameters(options.form);
+      requestOptions.data = options.form;
     }
+
     if (options.qs) {
       this._fixReplyMarkup(options.qs);
       this._fixReplyParameters(options.qs);
+      requestOptions.params = options.qs;
     }
 
-    options.method = 'POST';
-    options.url = this._buildURL(_path);
-    options.simple = false;
-    options.resolveWithFullResponse = true;
-    options.forever = true;
-    debug('HTTP request: %j', options);
-    return request(options)
+    if (options.formData) {
+      const form = new FormData();
+      Object.keys(options.formData).forEach(key => {
+        const data = options.formData[key];
+        form.append(key, data.value, data.options);
+      });
+      requestOptions.data = form;
+      requestOptions.headers = form.getHeaders();
+    }
+
+    if (this.options.request) {
+      Object.assign(requestOptions, this.options.request);
+    }
+
+    debug('HTTP request: %j', requestOptions);
+
+    return axios(requestOptions)
       .then(resp => {
-        let data;
         try {
-          data = resp.body = JSON.parse(resp.body);
+          const data = resp.data;
+          if (data.ok) {
+            return data.result;
+          }
+          throw new errors.TelegramError(`${data.error_code} ${data.description}`, resp);
         } catch (err) {
-          throw new errors.ParseError(`Error parsing response: ${resp.body}`, resp);
+          throw new errors.ParseError(`Error parsing response: ${resp.data}`, resp);
         }
-
-        if (data.ok) {
-          return data.result;
-        }
-
-        throw new errors.TelegramError(`${data.error_code} ${data.description}`, resp);
-      }).catch(error => {
-        // TODO: why can't we do `error instanceof errors.BaseError`?
-        if (error.response) throw error;
-        throw new errors.FatalError(error);
+      })
+      .catch(error => {
+        if (!error.response) throw new errors.FatalError(error);
+        throw error;
       });
   }
 
@@ -486,16 +497,25 @@ class TelegramBot extends EventEmitter {
   getFileStream(fileId, form = {}) {
     const fileStream = new stream.PassThrough();
     fileStream.path = fileId;
+
     this.getFileLink(fileId, form)
-      .then((fileURI) => {
-        fileStream.emit('info', {
-          uri: fileURI,
-        });
-        pump(streamedRequest(Object.assign({ uri: fileURI }, this.options.request)), fileStream);
+      .then((fileUrl) => {
+        fileStream.emit('info', { uri: fileUrl });
+
+        return axios({
+          method: 'get',
+          url: fileUrl,
+          responseType: 'stream',
+          ...this.options.request
+        })
+          .then(response => {
+            response.data.pipe(fileStream);
+          });
       })
       .catch((error) => {
         fileStream.emit('error', error);
       });
+
     return fileStream;
   }
 
