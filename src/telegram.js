@@ -323,6 +323,9 @@ class TelegramBot extends EventEmitter {
           }
           throw new errors.TelegramError(`${data.error_code} ${data.description}`, resp);
         } catch (err) {
+          if (err instanceof errors.TelegramError) {
+            throw err;
+          }
           throw new errors.ParseError(`Error parsing response: ${resp.data}`, resp);
         }
       })
@@ -533,7 +536,9 @@ class TelegramBot extends EventEmitter {
       // TODO: Ensure fileName doesn't contains slashes
       const filePath = path.join(downloadDir, fileName);
       pump(fileStream, fs.createWriteStream(filePath), (error) => {
-        if (error) { return reject(error); }
+        if (error) {
+          return reject(error);
+        }
         return resolve(filePath);
       });
     });
@@ -833,14 +838,14 @@ class TelegramBot extends EventEmitter {
   /** Start Telegram Bot API methods */
 
   /**
-  * Use this method to receive incoming updates using long polling.
-  * This method has an [older, compatible signature][getUpdates-v0.25.0]
-  * that is being deprecated.
-  *
-  * @param  {Object} [options] Additional Telegram query options
-  * @return {Promise}
-  * @see https://core.telegram.org/bots/api#getupdates
-  */
+   * Use this method to receive incoming updates using long polling.
+   * This method has an [older, compatible signature][getUpdates-v0.25.0]
+   * that is being deprecated.
+   *
+   * @param  {Object} [options] Additional Telegram query options
+   * @return {Promise}
+   * @see https://core.telegram.org/bots/api#getupdates
+   */
   getUpdates(form = {}) {
     /* The older method signature was getUpdates(timeout, limit, offset).
      * We need to ensure backwards-compatibility while maintaining
@@ -1086,19 +1091,19 @@ class TelegramBot extends EventEmitter {
   }
 
   /**
-  * Send audio
-  *
-  * **Your audio must be in the .MP3 or .M4A format.**
-  *
-  * @param  {Number|String} chatId  Unique identifier for the target chat or username of the target channel (in the format `@channelusername`)
-  * @param  {String|stream.Stream|Buffer} audio A file path, Stream or Buffer.
-  * Can also be a `file_id` previously uploaded.
-  * @param  {Object} [options] Additional Telegram query options
-  * @param  {Object} [fileOptions] Optional file related meta-data
-  * @return {Promise} On success, the sent [Message](https://core.telegram.org/bots/api#message) object is returned
-  * @see https://core.telegram.org/bots/api#sendaudio
-  * @see https://github.com/yagop/node-telegram-bot-api/blob/master/doc/usage.md#sending-files
-  */
+   * Send audio
+   *
+   * **Your audio must be in the .MP3 or .M4A format.**
+   *
+   * @param  {Number|String} chatId  Unique identifier for the target chat or username of the target channel (in the format `@channelusername`)
+   * @param  {String|stream.Stream|Buffer} audio A file path, Stream or Buffer.
+   * Can also be a `file_id` previously uploaded.
+   * @param  {Object} [options] Additional Telegram query options
+   * @param  {Object} [fileOptions] Optional file related meta-data
+   * @return {Promise} On success, the sent [Message](https://core.telegram.org/bots/api#message) object is returned
+   * @see https://core.telegram.org/bots/api#sendaudio
+   * @see https://github.com/yagop/node-telegram-bot-api/blob/master/doc/usage.md#sending-files
+   */
   sendAudio(chatId, audio, options = {}, fileOptions = {}) {
     const opts = {
       qs: options
@@ -1119,16 +1124,16 @@ class TelegramBot extends EventEmitter {
   }
 
   /**
-  * Send Document
-  * @param  {Number|String} chatId  Unique identifier for the target chat or username of the target channel (in the format `@channelusername`)
-  * @param  {String|stream.Stream|Buffer} doc A file path, Stream or Buffer.
-  * Can also be a `file_id` previously uploaded.
-  * @param  {Object} [options] Additional Telegram query options
-  * @param  {Object} [fileOptions] Optional file related meta-data
-  * @return {Promise}  On success, the sent [Message](https://core.telegram.org/bots/api#message) object is returned
-  * @see https://core.telegram.org/bots/api#sendDocument
-  * @see https://github.com/yagop/node-telegram-bot-api/blob/master/doc/usage.md#sending-files
-  */
+   * Send Document
+   * @param  {Number|String} chatId  Unique identifier for the target chat or username of the target channel (in the format `@channelusername`)
+   * @param  {String|stream.Stream|Buffer} doc A file path, Stream or Buffer.
+   * Can also be a `file_id` previously uploaded.
+   * @param  {Object} [options] Additional Telegram query options
+   * @param  {Object} [fileOptions] Optional file related meta-data
+   * @return {Promise}  On success, the sent [Message](https://core.telegram.org/bots/api#message) object is returned
+   * @see https://core.telegram.org/bots/api#sendDocument
+   * @see https://github.com/yagop/node-telegram-bot-api/blob/master/doc/usage.md#sending-files
+   */
   sendDocument(chatId, doc, options = {}, fileOptions = {}) {
     const opts = {
       qs: options
@@ -1240,7 +1245,7 @@ class TelegramBot extends EventEmitter {
    * @info The length parameter is actually optional. However, the API (at time of writing) requires you to always provide it until it is fixed.
    * @see https://core.telegram.org/bots/api#sendvideonote
    * @see https://github.com/yagop/node-telegram-bot-api/blob/master/doc/usage.md#sending-files
-  */
+   */
   sendVideoNote(chatId, videoNote, options = {}, fileOptions = {}) {
     const opts = {
       qs: options
@@ -1533,19 +1538,19 @@ class TelegramBot extends EventEmitter {
   }
 
   /**
-    * Use this method to ban a user in a group, a supergroup or a channel.
-    * In the case of supergroups and channels, the user will not be able to
-    * return to the chat on their own using invite links, etc., unless unbanned first..
-    *
-    * The **bot must be an administrator in the group, supergroup or a channel** for this to work.
-    *
-    *
-    * @param  {Number|String} chatId   Unique identifier for the target chat or username of the target channel (in the format `@channelusername`)
-    * @param  {Number} userId  Unique identifier of the target user
-    * @param  {Object} [options] Additional Telegram query options
-    * @return {Promise} True on success.
-    * @see https://core.telegram.org/bots/api#banchatmember
-    */
+   * Use this method to ban a user in a group, a supergroup or a channel.
+   * In the case of supergroups and channels, the user will not be able to
+   * return to the chat on their own using invite links, etc., unless unbanned first..
+   *
+   * The **bot must be an administrator in the group, supergroup or a channel** for this to work.
+   *
+   *
+   * @param  {Number|String} chatId   Unique identifier for the target chat or username of the target channel (in the format `@channelusername`)
+   * @param  {Number} userId  Unique identifier of the target user
+   * @param  {Object} [options] Additional Telegram query options
+   * @return {Promise} True on success.
+   * @see https://core.telegram.org/bots/api#banchatmember
+   */
   banChatMember(chatId, userId, form = {}) {
     form.chat_id = chatId;
     form.user_id = userId;
@@ -1553,21 +1558,21 @@ class TelegramBot extends EventEmitter {
   }
 
   /**
-  * Use this method to unban a previously kicked user in a supergroup.
-  * The user will not return to the group automatically, but will be
-  * able to join via link, etc.
-  *
-  * The **bot must be an administrator** in the supergroup or channel for this to work.
-  *
-  * **By default**, this method guarantees that after the call the user is not a member of the chat, but will be able to join it.
-  * So **if the user is a member of the chat they will also be removed from the chat**. If you don't want this, use the parameter *only_if_banned*
-  *
-  * @param  {Number|String} chatId   Unique identifier for the target chat or username of the target channel (in the format `@channelusername`)
-  * @param  {Number} userId  Unique identifier of the target user
-  * @param  {Object} [options] Additional Telegram query options
-  * @return {Promise} True on success
-  * @see https://core.telegram.org/bots/api#unbanchatmember
-  */
+   * Use this method to unban a previously kicked user in a supergroup.
+   * The user will not return to the group automatically, but will be
+   * able to join via link, etc.
+   *
+   * The **bot must be an administrator** in the supergroup or channel for this to work.
+   *
+   * **By default**, this method guarantees that after the call the user is not a member of the chat, but will be able to join it.
+   * So **if the user is a member of the chat they will also be removed from the chat**. If you don't want this, use the parameter *only_if_banned*
+   *
+   * @param  {Number|String} chatId   Unique identifier for the target chat or username of the target channel (in the format `@channelusername`)
+   * @param  {Number} userId  Unique identifier of the target user
+   * @param  {Object} [options] Additional Telegram query options
+   * @return {Promise} True on success
+   * @see https://core.telegram.org/bots/api#unbanchatmember
+   */
   unbanChatMember(chatId, userId, form = {}) {
     form.chat_id = chatId;
     form.user_id = userId;
@@ -1575,17 +1580,17 @@ class TelegramBot extends EventEmitter {
   }
 
   /**
-  * Use this method to restrict a user in a supergroup.
-  * The bot **must be an administrator in the supergroup** for this to work
-  * and must have the appropriate admin rights. Pass True for all boolean parameters
-  * to lift restrictions from a user. Returns True on success.
-  *
-  * @param  {Number|String} chatId  Unique identifier for the target chat or username of the target channel (in the format `@channelusername`)
-  * @param  {Number} userId Unique identifier of the target user
-  * @param  {Object} [options] Additional Telegram query options
-  * @return {Promise} True on success
-  * @see https://core.telegram.org/bots/api#restrictchatmember
-  */
+   * Use this method to restrict a user in a supergroup.
+   * The bot **must be an administrator in the supergroup** for this to work
+   * and must have the appropriate admin rights. Pass True for all boolean parameters
+   * to lift restrictions from a user. Returns True on success.
+   *
+   * @param  {Number|String} chatId  Unique identifier for the target chat or username of the target channel (in the format `@channelusername`)
+   * @param  {Number} userId Unique identifier of the target user
+   * @param  {Object} [options] Additional Telegram query options
+   * @return {Promise} True on success
+   * @see https://core.telegram.org/bots/api#restrictchatmember
+   */
   restrictChatMember(chatId, userId, form = {}) {
     form.chat_id = chatId;
     form.user_id = userId;
@@ -1646,16 +1651,16 @@ class TelegramBot extends EventEmitter {
   }
 
   /**
-  * Use this method to unban a previously banned channel chat in a supergroup or channel.
-  *
-  * The bot **must be an administrator** for this to work and must have the appropriate administrator rights.
-  *
-  * @param  {Number|String} chatId Unique identifier for the target chat or username of the target channel (in the format `@channelusername`)
-  * @param  {Number} senderChatId Unique identifier of the target user
-  * @param  {Object} [options] Additional Telegram query options
-  * @return {Promise} True on success
-  * @see https://core.telegram.org/bots/api#unbanchatsenderchat
-  */
+   * Use this method to unban a previously banned channel chat in a supergroup or channel.
+   *
+   * The bot **must be an administrator** for this to work and must have the appropriate administrator rights.
+   *
+   * @param  {Number|String} chatId Unique identifier for the target chat or username of the target channel (in the format `@channelusername`)
+   * @param  {Number} senderChatId Unique identifier of the target user
+   * @param  {Object} [options] Additional Telegram query options
+   * @return {Promise} True on success
+   * @see https://core.telegram.org/bots/api#unbanchatsenderchat
+   */
   unbanChatSenderChat(chatId, senderChatId, form = {}) {
     form.chat_id = chatId;
     form.sender_chat_id = senderChatId;
@@ -1845,15 +1850,15 @@ class TelegramBot extends EventEmitter {
   }
 
   /**
-  * Use this method to delete a chat photo. **Photos can't be changed for private chats**.
-  *
-  * The bot **must be an administrator in the chat** for this to work and must have the appropriate admin rights.
-  *
-  * @param  {Number|String} chatId  Unique identifier for the target chat or username of the target channel (in the format `@channelusername`)
-  * @param  {Object} [options] Additional Telegram query options
-  * @return {Promise} True on success
-  * @see https://core.telegram.org/bots/api#deletechatphoto
-  */
+   * Use this method to delete a chat photo. **Photos can't be changed for private chats**.
+   *
+   * The bot **must be an administrator in the chat** for this to work and must have the appropriate admin rights.
+   *
+   * @param  {Number|String} chatId  Unique identifier for the target chat or username of the target channel (in the format `@channelusername`)
+   * @param  {Object} [options] Additional Telegram query options
+   * @return {Promise} True on success
+   * @see https://core.telegram.org/bots/api#deletechatphoto
+   */
   deleteChatPhoto(chatId, form = {}) {
     form.chat_id = chatId;
     return this._request('deleteChatPhoto', { form });
@@ -1928,16 +1933,16 @@ class TelegramBot extends EventEmitter {
   }
 
   /**
-  * Use this method to clear the list of pinned messages in a chat.
-  *
-  * If the chat is not a private chat, the **bot must be an administrator in the chat** for this to work and must have the `can_pin_messages` administrator
-  * right in a supergroup or `can_edit_messages` administrator right in a channel.
-  *
-  * @param  {Number|String} chatId  Unique identifier for the target chat or username of the target channel (in the format `@channelusername`)
-  * @param  {Object} [options] Additional Telegram query options
-  * @return {Promise} True on success
-  * @see https://core.telegram.org/bots/api#unpinallchatmessages
-  */
+   * Use this method to clear the list of pinned messages in a chat.
+   *
+   * If the chat is not a private chat, the **bot must be an administrator in the chat** for this to work and must have the `can_pin_messages` administrator
+   * right in a supergroup or `can_edit_messages` administrator right in a channel.
+   *
+   * @param  {Number|String} chatId  Unique identifier for the target chat or username of the target channel (in the format `@channelusername`)
+   * @param  {Object} [options] Additional Telegram query options
+   * @return {Promise} True on success
+   * @see https://core.telegram.org/bots/api#unpinallchatmessages
+   */
   unpinAllChatMessages(chatId, form = {}) {
     form.chat_id = chatId;
     return this._request('unpinAllChatMessages', { form });
@@ -1985,13 +1990,13 @@ class TelegramBot extends EventEmitter {
   }
 
   /**
-  * Use this method to get the number of members in a chat.
-  *
-  * @param  {Number|String} chatId  Unique identifier for the target group or username of the target supergroup
-  * @param  {Object} [options] Additional Telegram query options
-  * @return {Promise} Int on success
-  * @see https://core.telegram.org/bots/api#getchatmembercount
-  */
+   * Use this method to get the number of members in a chat.
+   *
+   * @param  {Number|String} chatId  Unique identifier for the target group or username of the target supergroup
+   * @param  {Object} [options] Additional Telegram query options
+   * @return {Promise} Int on success
+   * @see https://core.telegram.org/bots/api#getchatmembercount
+   */
   getChatMemberCount(chatId, form = {}) {
     form.chat_id = chatId;
     return this._request('getChatMemberCount', { form });
@@ -2158,16 +2163,16 @@ class TelegramBot extends EventEmitter {
   }
 
   /**
-  * Use this method to edit the name of the 'General' topic in a forum supergroup chat.
-  * The bot must be an administrator in the chat for this to work and must have the can_manage_topics administrator rights.
-  * The topic will be automatically unhidden if it was hidden.
-  *
-  * @param {Number|String} chatId Unique identifier for the target group or username of the target supergroup (in the format @supergroupusername)
-  * @param {String} name New topic name, 1-128 characters
-  * @param {Object} [options] Additional Telegram query options
-  * @return {Promise} True on success
-  * @see https://core.telegram.org/bots/api#editgeneralforumtopic
-  */
+   * Use this method to edit the name of the 'General' topic in a forum supergroup chat.
+   * The bot must be an administrator in the chat for this to work and must have the can_manage_topics administrator rights.
+   * The topic will be automatically unhidden if it was hidden.
+   *
+   * @param {Number|String} chatId Unique identifier for the target group or username of the target supergroup (in the format @supergroupusername)
+   * @param {String} name New topic name, 1-128 characters
+   * @param {Object} [options] Additional Telegram query options
+   * @return {Promise} True on success
+   * @see https://core.telegram.org/bots/api#editgeneralforumtopic
+   */
   editGeneralForumTopic(chatId, name, form = {}) {
     form.chat_id = chatId;
     form.name = name;
@@ -2175,45 +2180,45 @@ class TelegramBot extends EventEmitter {
   }
 
   /**
-  * Use this method to close an open 'General' topic in a forum supergroup chat.
-  * The bot must be an administrator in the chat for this to work and must have the can_manage_topics administrator rights.
-  * The topic will be automatically unhidden if it was hidden.
-  *
-  * @param {Number|String} chatId Unique identifier for the target group or username of the target supergroup (in the format @supergroupusername)
-  * @param {Object} [options] Additional Telegram query options
-  * @return {Promise} True on success
-  * @see https://core.telegram.org/bots/api#closegeneralforumtopic
-  */
+   * Use this method to close an open 'General' topic in a forum supergroup chat.
+   * The bot must be an administrator in the chat for this to work and must have the can_manage_topics administrator rights.
+   * The topic will be automatically unhidden if it was hidden.
+   *
+   * @param {Number|String} chatId Unique identifier for the target group or username of the target supergroup (in the format @supergroupusername)
+   * @param {Object} [options] Additional Telegram query options
+   * @return {Promise} True on success
+   * @see https://core.telegram.org/bots/api#closegeneralforumtopic
+   */
   closeGeneralForumTopic(chatId, form = {}) {
     form.chat_id = chatId;
     return this._request('closeGeneralForumTopic', { form });
   }
 
   /**
-  * Use this method to reopen a closed 'General' topic in a forum supergroup chat.
-  * The bot must be an administrator in the chat for this to work and must have the can_manage_topics administrator rights.
-  * The topic will be automatically unhidden if it was hidden.
-  *
-  * @param {Number|String} chatId Unique identifier for the target group or username of the target supergroup (in the format @supergroupusername)
-  * @param {Object} [options] Additional Telegram query options
-  * @return {Promise} True on success
-  * @see https://core.telegram.org/bots/api#reopengeneralforumtopic
-  */
+   * Use this method to reopen a closed 'General' topic in a forum supergroup chat.
+   * The bot must be an administrator in the chat for this to work and must have the can_manage_topics administrator rights.
+   * The topic will be automatically unhidden if it was hidden.
+   *
+   * @param {Number|String} chatId Unique identifier for the target group or username of the target supergroup (in the format @supergroupusername)
+   * @param {Object} [options] Additional Telegram query options
+   * @return {Promise} True on success
+   * @see https://core.telegram.org/bots/api#reopengeneralforumtopic
+   */
   reopenGeneralForumTopic(chatId, form = {}) {
     form.chat_id = chatId;
     return this._request('reopenGeneralForumTopic', { form });
   }
 
   /**
-  * Use this method to hide the 'General' topic in a forum supergroup chat.
-  * The bot must be an administrator in the chat for this to work and must have the can_manage_topics administrator rights.
-  * The topic will be automatically closed if it was open.
-  *
-  * @param {Number|String} chatId Unique identifier for the target group or username of the target supergroup (in the format @supergroupusername)
-  * @param {Object} [options] Additional Telegram query options
-  * @return {Promise} True on success
-  * @see https://core.telegram.org/bots/api#hidegeneralforumtopic
-  */
+   * Use this method to hide the 'General' topic in a forum supergroup chat.
+   * The bot must be an administrator in the chat for this to work and must have the can_manage_topics administrator rights.
+   * The topic will be automatically closed if it was open.
+   *
+   * @param {Number|String} chatId Unique identifier for the target group or username of the target supergroup (in the format @supergroupusername)
+   * @param {Object} [options] Additional Telegram query options
+   * @return {Promise} True on success
+   * @see https://core.telegram.org/bots/api#hidegeneralforumtopic
+   */
   hideGeneralForumTopic(chatId, form = {}) {
     form.chat_id = chatId;
     return this._request('hideGeneralForumTopic', { form });
@@ -3010,18 +3015,18 @@ class TelegramBot extends EventEmitter {
   }
 
   /**
-  * Use this method to create a link for an invoice.
-  *
-  * @param {String} title Product name, 1-32 characters
-  * @param {String} description Product description, 1-255 characters
-  * @param {String} payload Bot defined invoice payload
-  * @param {String} providerToken Payment provider token
-  * @param {String} currency Three-letter ISO 4217 currency code
-  * @param {Array} prices Breakdown of prices
-  * @param {Object} [options] Additional Telegram query options
-  * @returns {Promise} The created invoice link as String on success.
-  * @see https://core.telegram.org/bots/api#createinvoicelink
-  */
+   * Use this method to create a link for an invoice.
+   *
+   * @param {String} title Product name, 1-32 characters
+   * @param {String} description Product description, 1-255 characters
+   * @param {String} payload Bot defined invoice payload
+   * @param {String} providerToken Payment provider token
+   * @param {String} currency Three-letter ISO 4217 currency code
+   * @param {Array} prices Breakdown of prices
+   * @param {Object} [options] Additional Telegram query options
+   * @returns {Promise} The created invoice link as String on success.
+   * @see https://core.telegram.org/bots/api#createinvoicelink
+   */
   createInvoiceLink(title, description, payload, providerToken, currency, prices, form = {}) {
     form.title = title;
     form.description = description;
@@ -3033,17 +3038,17 @@ class TelegramBot extends EventEmitter {
   }
 
   /**
-  * Use this method to reply to shipping queries.
-  *
-  * If you sent an invoice requesting a shipping address and the parameter is_flexible was specified,
-  * the Bot API will send an [Update](https://core.telegram.org/bots/api#update) with a shipping_query field to the bot
-  *
-  * @param  {String} shippingQueryId  Unique identifier for the query to be answered
-  * @param  {Boolean} ok Specify if delivery of the product is possible
-  * @param  {Object} [options] Additional Telegram query options
-  * @return {Promise} On success, True is returned
-  * @see https://core.telegram.org/bots/api#answershippingquery
-  */
+   * Use this method to reply to shipping queries.
+   *
+   * If you sent an invoice requesting a shipping address and the parameter is_flexible was specified,
+   * the Bot API will send an [Update](https://core.telegram.org/bots/api#update) with a shipping_query field to the bot
+   *
+   * @param  {String} shippingQueryId  Unique identifier for the query to be answered
+   * @param  {Boolean} ok Specify if delivery of the product is possible
+   * @param  {Object} [options] Additional Telegram query options
+   * @return {Promise} On success, True is returned
+   * @see https://core.telegram.org/bots/api#answershippingquery
+   */
   answerShippingQuery(shippingQueryId, ok, form = {}) {
     form.shipping_query_id = shippingQueryId;
     form.ok = ok;
@@ -3144,21 +3149,21 @@ class TelegramBot extends EventEmitter {
 
 
   /**
- * Use this method to delete a message, including service messages, with the following limitations:
- * - A message can only be deleted if it was sent less than 48 hours ago.
- * - A dice message can only be deleted if it was sent more than 24 hours ago.
- * - Bots can delete outgoing messages in groups and supergroups.
- * - Bots can delete incoming messages in groups, supergroups and channels.
- * - Bots granted `can_post_messages` permissions can delete outgoing messages in channels.
- * - If the bot is an administrator of a group, it can delete any message there.
- * - If the bot has `can_delete_messages` permission in a supergroup, it can delete any message there.
- *
- * @param  {Number|String} chatId  Unique identifier for the target chat or username of the target channel (in the format @channelusername)
- * @param  {Number} messageId  Unique identifier of the target message
- * @param  {Object} [options] Additional Telegram query options
- * @return {Promise} True on success
- * @see https://core.telegram.org/bots/api#deletemessage
- */
+   * Use this method to delete a message, including service messages, with the following limitations:
+   * - A message can only be deleted if it was sent less than 48 hours ago.
+   * - A dice message can only be deleted if it was sent more than 24 hours ago.
+   * - Bots can delete outgoing messages in groups and supergroups.
+   * - Bots can delete incoming messages in groups, supergroups and channels.
+   * - Bots granted `can_post_messages` permissions can delete outgoing messages in channels.
+   * - If the bot is an administrator of a group, it can delete any message there.
+   * - If the bot has `can_delete_messages` permission in a supergroup, it can delete any message there.
+   *
+   * @param  {Number|String} chatId  Unique identifier for the target chat or username of the target channel (in the format @channelusername)
+   * @param  {Number} messageId  Unique identifier of the target message
+   * @param  {Object} [options] Additional Telegram query options
+   * @return {Promise} True on success
+   * @see https://core.telegram.org/bots/api#deletemessage
+   */
   deleteMessage(chatId, messageId, form = {}) {
     form.chat_id = chatId;
     form.message_id = messageId;
